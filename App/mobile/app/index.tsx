@@ -20,6 +20,12 @@ export default function Index() {
         </TouchableOpacity>
       </Link>
 
+      <Link href="/expenses" asChild>
+        <TouchableOpacity style={styles.viewButton}>
+          <Text style={styles.viewButtonText}>View Expenses</Text>
+        </TouchableOpacity>
+      </Link>
+
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
@@ -78,6 +84,20 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  viewButton: {
+    backgroundColor: '#fff',
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  viewButtonText: {
+    color: '#007AFF',
     fontSize: 16,
     fontWeight: 'bold',
   },
