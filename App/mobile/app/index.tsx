@@ -1,5 +1,6 @@
 import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAuth } from '../src/context/AuthContext';
+import { Link } from 'expo-router';
 
 export default function Index() {
   const { user, logout } = useAuth();
@@ -12,6 +13,12 @@ export default function Index() {
         <Text style={styles.name}>{user?.name || user?.email}</Text>
         <Text style={styles.email}>{user?.email}</Text>
       </View>
+
+      <Link href="/add-expense" asChild>
+        <TouchableOpacity style={styles.addButton}>
+          <Text style={styles.addButtonText}>Add New Expense</Text>
+        </TouchableOpacity>
+      </Link>
 
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutText}>Logout</Text>
@@ -61,6 +68,18 @@ const styles = StyleSheet.create({
   email: {
     fontSize: 14,
     color: '#999',
+  },
+  addButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   logoutButton: {
     paddingVertical: 12,

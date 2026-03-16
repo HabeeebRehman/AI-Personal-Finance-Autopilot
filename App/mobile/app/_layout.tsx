@@ -35,6 +35,7 @@ function AuthProtectedLayout() {
       <Stack.Screen name="index" options={{ title: "Home" }} />
       <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
       <Stack.Screen name="(auth)/register" options={{ headerShown: false }} />
+      <Stack.Screen name="add-expense" options={{ title: "Add Expense", presentation: 'modal' }} />
     </Stack>
   );
 }
