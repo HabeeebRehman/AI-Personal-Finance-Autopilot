@@ -10,4 +10,5 @@ export const config = {
   databaseUrl: process.env.DATABASE_URL,
   jwtSecret: process.env.JWT_SECRET || 'super-secret-key',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1d',
+  openaiApiKey: process.env.OPENAI_API_KEY || '',
 };

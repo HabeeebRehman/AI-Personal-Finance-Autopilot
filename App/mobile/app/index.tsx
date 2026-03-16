@@ -26,6 +26,12 @@ export default function Index() {
         </TouchableOpacity>
       </Link>
 
+      <Link href="/dashboard" asChild>
+        <TouchableOpacity style={styles.dashboardButton}>
+          <Text style={styles.dashboardButtonText}>Go to Dashboard</Text>
+        </TouchableOpacity>
+      </Link>
+
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
@@ -98,6 +104,18 @@ const styles = StyleSheet.create({
   },
   viewButtonText: {
     color: '#007AFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  dashboardButton: {
+    backgroundColor: '#28a745',
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  dashboardButtonText: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
