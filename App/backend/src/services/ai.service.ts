@@ -1,9 +1,7 @@
 import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import Anthropic from '@anthropic-ai/sdk';
 import { config } from '../config';
-
-const openai = new OpenAI({
-  apiKey: config.openaiApiKey,
-});
 
 const CATEGORIES = [
   'Food',
@@ -13,39 +11,97 @@ const CATEGORIES = [
   'Entertainment',
   'Health',
   'Other',
-].join(', ');
+];
+
+const CATEGORIES_STR = CATEGORIES.join(', ');
+
+const PROMPT_TEMPLATE = (description: string) => 
+  `Categorize this expense into one of the following categories: ${CATEGORIES_STR}. Expense: "${description}". Return only the category name from the list.`;
 
 /**
- * Categorizes an expense description using OpenAI GPT.
- * @param description The expense description.
- * @returns The detected category or 'Other' if detection fails.
+ * Categorize using OpenAI
  */
-export const categorizeExpense = async (description: string): Promise<string> => {
-  if (!description.trim()) {
-    return 'Other';
-  }
-
+const categorizeWithOpenAI = async (description: string): Promise<string | null> => {
+  if (!config.openaiApiKey) return null;
   try {
-    const prompt = `Categorize this expense into one of the following categories: ${CATEGORIES}. Expense: "${description}". Return only the category name.`;
-
+    const openai = new OpenAI({ apiKey: config.openaiApiKey });
     const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: prompt }],
+      messages: [{ role: 'user', content: PROMPT_TEMPLATE(description) }],
       temperature: 0,
       max_tokens: 10,
     });
-
-    const category = response.choices[0]?.message?.content?.trim() || 'Other';
-
-    // Validate if the returned category is one of the allowed ones
-    if (CATEGORIES.includes(category)) {
-      return category;
-    }
-
-    return 'Other';
+    return response.choices[0]?.message?.content?.trim() || null;
   } catch (error) {
-    console.error('Error categorizing expense with OpenAI:', error);
-    // Fallback to 'Other' if the AI service fails
-    return 'Other';
+    console.error('OpenAI Categorization Error:', error);
+    return null;
   }
+};
+
+/**
+ * Categorize using Google Gemini
+ */
+const categorizeWithGemini = async (description: string): Promise<string | null> => {
+  if (!config.geminiApiKey) return null;
+  try {
+    const genAI = new GoogleGenerativeAI(config.geminiApiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const result = await model.generateContent(PROMPT_TEMPLATE(description));
+    const response = await result.response;
+    return response.text().trim() || null;
+  } catch (error) {
+    console.error('Gemini Categorization Error:', error);
+    return null;
+  }
+};
+
+/**
+ * Categorize using Anthropic Claude
+ */
+const categorizeWithClaude = async (description: string): Promise<string | null> => {
+  if (!config.claudeApiKey) return null;
+  try {
+    const anthropic = new Anthropic({ apiKey: config.claudeApiKey });
+    const response = await anthropic.messages.create({
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 10,
+      messages: [{ role: 'user', content: PROMPT_TEMPLATE(description) }],
+    });
+    // @ts-ignore - Anthropic SDK type compatibility
+    const content = response.content[0]?.text;
+    return content?.trim() || null;
+  } catch (error) {
+    console.error('Claude Categorization Error:', error);
+    return null;
+  }
+};
+
+/**
+ * Categorizes an expense description using available AI providers.
+ * Tries providers in order: OpenAI -> Gemini -> Claude.
+ * @param description The expense description.
+ * @returns The detected category or 'Other' if all providers fail or are not configured.
+ */
+export const categorizeExpense = async (description: string): Promise<string> => {
+  if (!description.trim()) return 'Other';
+
+  // Try OpenAI first
+  let category = await categorizeWithOpenAI(description);
+  
+  // Fallback to Gemini
+  if (!category || !CATEGORIES.includes(category)) {
+    category = await categorizeWithGemini(description);
+  }
+
+  // Fallback to Claude
+  if (!category || !CATEGORIES.includes(category)) {
+    category = await categorizeWithClaude(description);
+  }
+
+  // Final check and fallback
+  if (category && CATEGORIES.includes(category)) {
+    return category;
+  }
+
+  return 'Other';
 };

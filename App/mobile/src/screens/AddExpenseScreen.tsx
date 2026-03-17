@@ -31,13 +31,13 @@ const AddExpenseScreen = () => {
   const [error, setError] = useState('');
 
   const handleAddExpense = async () => {
-    // Basic validation
     if (!amount || parseFloat(amount) <= 0) {
       setError('Please enter a valid amount greater than 0');
       return;
     }
-    if (!category) {
-      setError('Please select a category');
+    // A category is only required if a description is not provided for the AI to use.
+    if (!category && !description.trim()) {
+      setError('Please select a category or provide a description for AI categorization.');
       return;
     }
 
@@ -45,11 +45,16 @@ const AddExpenseScreen = () => {
     setLoading(true);
 
     try {
-      const response = await createExpense({
+      const expensePayload: { amount: number; description: string; category?: string } = {
         amount: parseFloat(amount),
-        category,
         description: description.trim(),
-      });
+      };
+
+      if (category) {
+        expensePayload.category = category;
+      }
+
+      const response = await createExpense(expensePayload);
 
       if (response.success) {
         Alert.alert('Success', 'Expense added successfully!');
