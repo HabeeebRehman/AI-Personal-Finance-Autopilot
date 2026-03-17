@@ -23,10 +23,18 @@ export const createExpense = async (
     }
 
     // Validate missing fields
-    if (amount === undefined || !category) {
+    if (amount === undefined) {
       return res.status(400).json({
         success: false,
-        message: 'Amount and category are required',
+        message: 'Amount is required',
+      });
+    }
+
+    // A category is only required if a description is not provided for the AI to use.
+    if (!category && !description) {
+      return res.status(400).json({
+        success: false,
+        message: 'Category or description is required for AI categorization',
       });
     }
 

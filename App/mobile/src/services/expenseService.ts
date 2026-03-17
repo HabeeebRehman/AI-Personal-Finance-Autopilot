@@ -30,7 +30,7 @@ export type Expense = {
 
 export interface ExpenseData {
   amount: number;
-  category: string;
+  category?: string;
   description?: string;
 }
 
