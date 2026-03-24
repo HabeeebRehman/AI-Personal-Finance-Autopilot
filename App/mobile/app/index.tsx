@@ -32,6 +32,12 @@ export default function Index() {
         </TouchableOpacity>
       </Link>
 
+      <Link href={"/insights" as any} asChild>
+        <TouchableOpacity style={styles.insightButton}>
+          <Text style={styles.insightButtonText}>AI Insights ✨</Text>
+        </TouchableOpacity>
+      </Link>
+
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
@@ -115,6 +121,25 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   dashboardButtonText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  insightButton: {
+    backgroundColor: '#6C63FF',
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+    shadowColor: '#6C63FF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  insightButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',

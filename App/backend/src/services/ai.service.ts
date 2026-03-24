@@ -45,7 +45,7 @@ const categorizeWithGemini = async (description: string): Promise<string | null>
   if (!config.geminiApiKey) return null;
   try {
     const genAI = new GoogleGenerativeAI(config.geminiApiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(PROMPT_TEMPLATE(description));
     const response = await result.response;
     return response.text().trim() || null;
