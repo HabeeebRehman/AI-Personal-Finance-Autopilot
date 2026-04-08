@@ -32,20 +32,13 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const expenseController = __importStar(require("../controllers/expense.controller"));
+const budgetController = __importStar(require("../controllers/budget.controller"));
 const auth_middleware_1 = require("../middleware/auth.middleware");
-const multer_1 = __importDefault(require("multer"));
-const os_1 = __importDefault(require("os"));
-const upload = (0, multer_1.default)({ dest: os_1.default.tmpdir() });
 const router = (0, express_1.Router)();
-// All expense routes require authentication
+// All budget routes require authentication
 router.use(auth_middleware_1.protect);
-router.post('/', expenseController.createExpense);
-router.get('/', expenseController.getExpenses);
-router.post('/import', upload.single('file'), expenseController.importExpenses);
+router.post('/', budgetController.setBudget);
+router.get('/', budgetController.getBudget);
 exports.default = router;

@@ -6,6 +6,7 @@ export interface CreateExpenseData {
   category?: string; // Category is now optional
   description?: string;
   userId: string;
+  date?: string | Date;
 }
 
 /**
@@ -27,7 +28,23 @@ export const createExpense = async (data: CreateExpenseData) => {
       category,
       description: data.description,
       userId: data.userId,
+      createdAt: data.date ? new Date(data.date) : undefined,
     },
+  });
+};
+
+/**
+ * Bulk create expenses
+ */
+export const bulkCreateExpenses = async (expenses: CreateExpenseData[]) => {
+  return await prisma.expense.createMany({
+    data: expenses.map((exp) => ({
+      amount: exp.amount,
+      category: exp.category || 'Other',
+      description: exp.description,
+      userId: exp.userId,
+      createdAt: exp.date ? new Date(exp.date) : undefined,
+    })),
   });
 };
 

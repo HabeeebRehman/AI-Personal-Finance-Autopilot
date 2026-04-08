@@ -99,6 +99,45 @@ export const fetchExpenses = async (): Promise<ExpenseResponse<Expense[]>> => {
   }
 };
 
+/**
+ * Import expenses from CSV
+ */
+export const importExpenses = async (fileUri: string, fileName: string): Promise<ExpenseResponse<{ inserted: number }>> => {
+  try {
+    const token = await getToken();
+    
+    if (!token) {
+      return { success: false, message: 'No authentication token found' };
+    }
+
+    const formData = new FormData();
+    // @ts-ignore - FormData for file upload in RN
+    formData.append('file', {
+      uri: fileUri,
+      name: fileName,
+      type: 'text/csv',
+    });
+
+    const response = await api.post<ExpenseResponse<{ inserted: number }>>(
+      '/expenses/import',
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      return error.response.data;
+    }
+    return { success: false, message: 'Connection error to backend' };
+  }
+};
+
 export default {
   createExpense,
   fetchExpenses,

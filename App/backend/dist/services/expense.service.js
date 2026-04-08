@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getExpensesByUserId = exports.createExpense = void 0;
+exports.getExpensesByUserId = exports.bulkCreateExpenses = exports.createExpense = void 0;
 const prisma_1 = __importDefault(require("../prisma"));
 const ai_service_1 = require("./ai.service");
 /**
@@ -24,10 +24,26 @@ const createExpense = async (data) => {
             category,
             description: data.description,
             userId: data.userId,
+            createdAt: data.date ? new Date(data.date) : undefined,
         },
     });
 };
 exports.createExpense = createExpense;
+/**
+ * Bulk create expenses
+ */
+const bulkCreateExpenses = async (expenses) => {
+    return await prisma_1.default.expense.createMany({
+        data: expenses.map((exp) => ({
+            amount: exp.amount,
+            category: exp.category || 'Other',
+            description: exp.description,
+            userId: exp.userId,
+            createdAt: exp.date ? new Date(exp.date) : undefined,
+        })),
+    });
+};
+exports.bulkCreateExpenses = bulkCreateExpenses;
 /**
  * Get all expenses for a user
  */

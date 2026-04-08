@@ -1,6 +1,81 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import * as expenseService from '../services/expense.service';
+import csv from 'csv-parser';
+import fs from 'fs';
+
+/**
+ * Import expenses from CSV
+ */
+export const importExpenses = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Not authorized, user ID missing from request',
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please upload a CSV file',
+      });
+    }
+
+    const results: any[] = [];
+    const filePath = req.file.path;
+
+    fs.createReadStream(filePath)
+      .pipe(csv())
+      .on('data', (data) => results.push(data))
+      .on('end', async () => {
+        try {
+          const formattedExpenses = results.map((row) => {
+            const amount = parseFloat(row.amount);
+            const date = new Date(row.date);
+            
+            return {
+              amount: isNaN(amount) ? 0 : amount,
+              category: row.category || 'Other',
+              description: row.description || '',
+              date: isNaN(date.getTime()) ? new Date() : date,
+              userId,
+            };
+          });
+
+          // Filter out invalid amounts
+          const validExpenses = formattedExpenses.filter(exp => exp.amount > 0);
+
+          if (validExpenses.length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: 'No valid expenses found in CSV',
+            });
+          }
+
+          const response = await expenseService.bulkCreateExpenses(validExpenses);
+
+          // Delete temp file
+          fs.unlinkSync(filePath);
+
+          res.status(200).json({
+            success: true,
+            inserted: response.count,
+          });
+        } catch (error) {
+          next(error);
+        }
+      });
+  } catch (error) {
+    next(error);
+  }
+};
 
 /**
  * Create a new expense

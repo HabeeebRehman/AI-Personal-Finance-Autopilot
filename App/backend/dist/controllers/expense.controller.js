@@ -32,9 +32,76 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getExpenses = exports.createExpense = void 0;
+exports.getExpenses = exports.createExpense = exports.importExpenses = void 0;
 const expenseService = __importStar(require("../services/expense.service"));
+const csv_parser_1 = __importDefault(require("csv-parser"));
+const fs_1 = __importDefault(require("fs"));
+/**
+ * Import expenses from CSV
+ */
+const importExpenses = async (req, res, next) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Not authorized, user ID missing from request',
+            });
+        }
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please upload a CSV file',
+            });
+        }
+        const results = [];
+        const filePath = req.file.path;
+        fs_1.default.createReadStream(filePath)
+            .pipe((0, csv_parser_1.default)())
+            .on('data', (data) => results.push(data))
+            .on('end', async () => {
+            try {
+                const formattedExpenses = results.map((row) => {
+                    const amount = parseFloat(row.amount);
+                    const date = new Date(row.date);
+                    return {
+                        amount: isNaN(amount) ? 0 : amount,
+                        category: row.category || 'Other',
+                        description: row.description || '',
+                        date: isNaN(date.getTime()) ? new Date() : date,
+                        userId,
+                    };
+                });
+                // Filter out invalid amounts
+                const validExpenses = formattedExpenses.filter(exp => exp.amount > 0);
+                if (validExpenses.length === 0) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'No valid expenses found in CSV',
+                    });
+                }
+                const response = await expenseService.bulkCreateExpenses(validExpenses);
+                // Delete temp file
+                fs_1.default.unlinkSync(filePath);
+                res.status(200).json({
+                    success: true,
+                    inserted: response.count,
+                });
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.importExpenses = importExpenses;
 /**
  * Create a new expense
  */
