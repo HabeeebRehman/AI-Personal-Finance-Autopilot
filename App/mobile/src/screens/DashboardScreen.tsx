@@ -9,6 +9,9 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { fetchExpenses, Expense } from '../services/expenseService';
+import { getBudget } from '../services/budgetService';
+import { getAlerts, Alert as AlertType } from '../services/alertService';
+import AlertCard from '../components/AlertCard';
 
 const MOCKED_INCOME = 50000;
 
@@ -17,6 +20,8 @@ const DashboardScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [budget, setBudget] = useState<number | null>(null);
+  const [alert, setAlert] = useState<AlertType | null>(null);
 
   const calculateTotals = (expenses: Expense[]) => {
     const spent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -26,12 +31,30 @@ const DashboardScreen = () => {
   const loadDashboardData = useCallback(async () => {
     try {
       setError(null);
-      const response = await fetchExpenses();
-      if (response.success && response.data) {
-        calculateTotals(response.data);
-      } else {
-        setError(response.message || 'Failed to load dashboard data');
+      
+      const now = new Date();
+      const month = now.getMonth() + 1;
+      const year = now.getFullYear();
+
+      // Parallel fetch
+      const [expenseRes, budgetRes, alertRes] = await Promise.all([
+        fetchExpenses(),
+        getBudget(month, year),
+        getAlerts(),
+      ]);
+
+      if (expenseRes.success && expenseRes.data) {
+        calculateTotals(expenseRes.data);
       }
+
+      if (budgetRes.success && budgetRes.data) {
+        setBudget(budgetRes.data.amount);
+      }
+
+      if (alertRes.success && alertRes.data) {
+        setAlert(alertRes.data);
+      }
+
     } catch (err) {
       setError('An unexpected error occurred while fetching data');
       console.error(err);
@@ -50,7 +73,7 @@ const DashboardScreen = () => {
     loadDashboardData();
   };
 
-  const remainingBalance = MOCKED_INCOME - totalSpent;
+  const remainingBalance = (budget || MOCKED_INCOME) - totalSpent;
 
   if (loading && !refreshing) {
     return (
@@ -68,11 +91,13 @@ const DashboardScreen = () => {
       >
         <Text style={styles.headerTitle}>Dashboard</Text>
 
+        {alert && <AlertCard alert={alert} />}
+
         <View style={styles.cardContainer}>
-          {/* Total Income Card */}
+          {/* Budget/Income Card */}
           <View style={[styles.card, styles.incomeCard]}>
-            <Text style={styles.cardTitle}>Total Income</Text>
-            <Text style={styles.cardValue}>₹{MOCKED_INCOME.toFixed(2)}</Text>
+            <Text style={styles.cardTitle}>{budget ? 'Monthly Budget' : 'Total Income'}</Text>
+            <Text style={styles.cardValue}>₹{(budget || MOCKED_INCOME).toFixed(2)}</Text>
           </View>
 
           {/* Total Spent Card */}

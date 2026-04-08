@@ -5,6 +5,8 @@ import authRouter from './auth.routes';
 import expenseRouter from './expense.routes';
 import analyticsRouter from './analytics.routes';
 import insightRouter from './insight.routes';
+import budgetRouter from './budget.routes';
+import alertRouter from './alert.routes';
 
 import { protect } from '../middleware/auth.middleware';
 
@@ -16,5 +18,7 @@ router.use('/users', protect, userRouter);
 router.use('/expenses', expenseRouter);
 router.use('/analytics', analyticsRouter);
 router.use('/insights', protect, insightRouter);
+router.use('/budget', budgetRouter);
+router.use('/alerts', alertRouter);
 
 export default router;
