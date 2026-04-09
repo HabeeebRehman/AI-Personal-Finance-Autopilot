@@ -63,6 +63,9 @@ export const getForecast = async (userId: string) => {
         lte: now, // Only consider expenses up to today
       },
     },
+    select: {
+      amount: true,
+    },
   });
 
   const totalSpentThisMonth = expensesThisMonth.reduce((sum, exp) => sum + exp.amount, 0);
@@ -89,6 +92,10 @@ export const getFinancialHealth = async (userId: string) => {
         gte: startDate,
         lte: endDate,
       },
+    },
+    select: {
+      amount: true,
+      createdAt: true,
     },
   });
 

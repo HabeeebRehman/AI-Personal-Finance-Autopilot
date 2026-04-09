@@ -39,6 +39,9 @@ function AuthProtectedLayout() {
       <Stack.Screen name="expenses" options={{ title: "My Expenses" }} />
       <Stack.Screen name="dashboard" options={{ title: "Dashboard" }} />
       <Stack.Screen name="insights" options={{ title: "AI Insights" }} />
+      <Stack.Screen name="spending-trend" options={{ title: "Spending Trend" }} />
+      <Stack.Screen name="budget" options={{ title: "Monthly Budget" }} />
+      <Stack.Screen name="import-csv" options={{ title: "Import CSV", presentation: 'modal' }} />
     </Stack>
   );
 }
