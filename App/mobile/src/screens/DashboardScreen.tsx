@@ -7,7 +7,9 @@ import {
   ScrollView,
   RefreshControl,
   SafeAreaView,
+  TouchableOpacity,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { fetchExpenses, Expense } from '../services/expenseService';
 import { getBudget } from '../services/budgetService';
 import { getAlerts, Alert as AlertType } from '../services/alertService';
@@ -16,6 +18,7 @@ import AlertCard from '../components/AlertCard';
 const MOCKED_INCOME = 50000;
 
 const DashboardScreen = () => {
+  const router = useRouter();
   const [totalSpent, setTotalSpent] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -113,6 +116,24 @@ const DashboardScreen = () => {
           </View>
         </View>
 
+        <View style={styles.actionsContainer}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.actionGrid}>
+            <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/spending-trend' as any)}>
+              <Text style={styles.actionButtonText}>Spending Trend</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/budget' as any)}>
+              <Text style={styles.actionButtonText}>Set Budget</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/import-csv' as any)}>
+              <Text style={styles.actionButtonText}>Import CSV</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/insights' as any)}>
+              <Text style={styles.actionButtonText}>AI Insights</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {error && <Text style={styles.errorText}>{error}</Text>}
       </ScrollView>
     </SafeAreaView>
@@ -171,6 +192,39 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#333',
+  },
+  actionsContainer: {
+    marginTop: 32,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1e2a3b',
+    marginBottom: 16,
+  },
+  actionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  actionButton: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    width: '48%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#e1e8ef',
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#007AFF',
   },
   errorText: {
     marginTop: 20,

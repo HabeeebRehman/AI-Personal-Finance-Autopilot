@@ -56,8 +56,37 @@ export const getExpensesByUserId = async (userId: string) => {
     where: {
       userId,
     },
+    select: {
+      id: true,
+      amount: true,
+      category: true,
+      description: true,
+      createdAt: true,
+    },
     orderBy: {
       createdAt: 'desc',
+    },
+  });
+};
+
+/**
+ * Get expenses for a user within a specific date range
+ */
+export const getExpensesByDateRange = async (userId: string, startDate: Date, endDate: Date) => {
+  return await prisma.expense.findMany({
+    where: {
+      userId,
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+    select: {
+      amount: true,
+      createdAt: true,
+    },
+    orderBy: {
+      createdAt: 'asc',
     },
   });
 };

@@ -1,12 +1,17 @@
 import app from './app';
 import { config } from './config';
 import prisma from './prisma';
+import { scheduleWeeklyReports } from './utils/cron';
 
 const startServer = async () => {
   try {
     // Check database connection
     await prisma.$connect();
     console.log('Database connected successfully');
+
+    // Initialize scheduled tasks
+    scheduleWeeklyReports();
+    console.log('Scheduled tasks initialized');
 
     const port = config.port;
     const server = app.listen(port, () => {
